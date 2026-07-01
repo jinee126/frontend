@@ -2,7 +2,7 @@ import { fetchAuthSession } from 'aws-amplify/auth'
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router'
 import { clearAuthUser, setAuthUserFromSession } from '@/stores/auth-user'
-import { isTokenExpired } from '@/utils/token-expired'
+import { isTokenExpired } from '@/utils/common'
 
 export function useAuthGuard() {
   const navigate = useNavigate()
