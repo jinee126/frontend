@@ -3,12 +3,20 @@ import { fetchAuthSession } from 'aws-amplify/auth'
 import { $accessToken } from '@/stores/access-token'
 import { clearAuthUser } from '@/stores/auth-user'
 import type { ApiResponse } from '@/types/api'
-import { signOutWithAmplify } from '@/utils/amplify-auth'
+import { signOutWithAmplify } from '@/api/amplify-auth'
 import { isTokenExpired } from '@/utils/common'
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_BASE_URL,
+  baseURL: import.meta.env.VITE_API_BASE_URL,
 })
+
+// 로그아웃 처리 후 로그인 페이지로 이동시킨다.
+async function forceSignOut() {
+  await signOutWithAmplify(false)
+  clearAuthUser()
+  $accessToken.set(undefined)
+  window.location.href = '/sign-in'
+}
 
 // Request interceptor
 api.interceptors.request.use(async (config) => {
@@ -16,22 +24,18 @@ api.interceptors.request.use(async (config) => {
   const exp = session.tokens?.idToken?.payload?.exp
 
   if (!exp || isTokenExpired(exp)) {
-    await signOutWithAmplify(false)
-    clearAuthUser()
-    $accessToken.set(undefined)
-    window.location.href = '/sign-in'
+    await forceSignOut()
     return Promise.reject(new Error('토큰이 만료되었습니다.'))
   }
 
   const token = $accessToken.get()
-  console.log('항상티겟지?' + token)
   if (token) config.headers.Authorization = `Bearer ${token}`
   return config
 })
 
-let tokenRefreshing: Promise<string> | null = null
-
-async function refreshAccessToken(): Promise<string> {
+// 현재는 미사용 - accessToken 만료 시 재발급이 필요해지면 재사용 예정.
+// fetchAuthSession({ forceRefresh: true })가 Amplify storage의 refreshToken으로 새 토큰을 발급받는다.
+export async function refreshAccessToken(): Promise<string> {
   const session = await fetchAuthSession({ forceRefresh: true })
   const newAccessToken = session.tokens?.accessToken?.toString()
   if (!newAccessToken) {
@@ -45,28 +49,10 @@ api.interceptors.response.use(
   (response) => response,
   // 서버 에러 응답 캐치 미들웨어
   async ({ response, config }: AxiosError<ApiResponse<null>>) => {
-    if (response && config) {
-      if (response.status === 401) {
-        try {
-          if (!tokenRefreshing) tokenRefreshing = refreshAccessToken()
-
-          const newAccessToken = await tokenRefreshing
-          $accessToken.set(newAccessToken)
-          config.headers.Authorization = `Bearer ${newAccessToken}`
-          tokenRefreshing = null
-
-          return await api(config)
-        } catch (refreshError) {
-          // Cognito의 refreshToken까지 만료/무효화된 상태 - 더 이상 갱신 불가
-          tokenRefreshing = null
-          await signOutWithAmplify(false)
-          $accessToken.set(undefined)
-          // ⚠️ 기존 removeAuth()가 $accessToken 외에 다른 상태($isLocalLogin 등)도
-          // 같이 정리했다면, 그 호출도 여기 같이 넣어야 할 - removeAuth() 구현 확인 필요
-          window.location.href = '/intc/login'
-          return
-        }
-      }
+    // 401 = 인증 실패(만료/위변조 등) - 갱신 시도 없이 즉시 로그아웃
+    if (response?.status === 401) {
+      await forceSignOut()
+      return
     }
 
     return Promise.reject({ response, config })

@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query'
-import { signInWithAmplify } from '@/utils/amplify-auth'
+import { signInWithAmplify } from '@/api/amplify-auth'
 
 type SignInParams = {
   userId: string
