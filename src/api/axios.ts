@@ -4,7 +4,7 @@ import { $accessToken } from '@/stores/access-token'
 import { clearAuthUser } from '@/stores/auth-user'
 import type { ApiResponse } from '@/types/api'
 import { signOutWithAmplify } from '@/api/amplify-auth'
-import { isTokenExpired } from '@/utils/common'
+import { getTokenExp, isTokenExpired } from '@/utils/common'
 
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -19,17 +19,18 @@ async function forceSignOut() {
 }
 
 // Request interceptor
-api.interceptors.request.use(async (config) => {
-  const session = await fetchAuthSession()
-  const exp = session.tokens?.idToken?.payload?.exp
+// fetchAuthSession()은 토큰을 자동 갱신하므로 호출하지 않고,
+// 로그인 시 저장한 accessToken의 exp를 직접 디코드해 유효성만 검사한다.
+api.interceptors.request.use((config) => {
+  const token = $accessToken.get()
+  const exp = token ? getTokenExp(token) : null
 
   if (!exp || isTokenExpired(exp)) {
-    await forceSignOut()
+    forceSignOut()
     return Promise.reject(new Error('토큰이 만료되었습니다.'))
   }
 
-  const token = $accessToken.get()
-  if (token) config.headers.Authorization = `Bearer ${token}`
+  config.headers.Authorization = `Bearer ${token}`
   return config
 })
 

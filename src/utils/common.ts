@@ -16,6 +16,17 @@ export function isTokenExpired(exp: number): boolean {
   return Date.now() >= exp * 1000
 }
 
+// JWT payload에서 exp(초 단위)를 꺼낸다. 디코드 실패 시 null.
+export function getTokenExp(token: string): number | null {
+  try {
+    const payload = token.split('.')[1]
+    const json = atob(payload.replace(/-/g, '+').replace(/_/g, '/'))
+    return JSON.parse(json).exp ?? null
+  } catch {
+    return null
+  }
+}
+
 // 로그인 에러 객체를 사용자에게 보여줄 메시지로 변환한다.
 export function getSignInErrorMessage(error: unknown): string {
   if (error instanceof Error) {
