@@ -11,7 +11,7 @@ import AlertModal from './components/alert-modal'
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientBoundary>
-        <BrowserRouter basename="/intc">
+        <BrowserRouter>
             <Router />
             <AlertModal />
         </BrowserRouter>

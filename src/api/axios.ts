@@ -15,7 +15,7 @@ async function forceSignOut() {
   await signOutWithAmplify(false)
   clearAuthUser()
   $accessToken.set(undefined)
-  window.location.href = '/sign-in'
+  window.location.href = '/login'
 }
 
 // Request interceptor
