@@ -1,12 +1,15 @@
 import type { AuthSession } from 'aws-amplify/auth'
-import { atom } from 'nanostores'
+import { persistentAtom } from '@nanostores/persistent'
 
 export interface AuthUser {
   authorityGroup: string
   menuGroup: string
 }
 
-export const $authUser = atom<AuthUser | null>(null)
+export const $authUser = persistentAtom<AuthUser | null>('authUser', null, {
+  encode: JSON.stringify,
+  decode: JSON.parse,
+})
 
 export function setAuthUserFromSession(session: AuthSession) {
   const payload = session.tokens?.idToken?.payload
