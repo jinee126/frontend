@@ -1,28 +1,27 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
-import { fetchAuthSession } from 'aws-amplify/auth'
+import { $accessToken } from '@/stores/access-token'
+import { getTokenExp, isTokenExpired } from '@/utils/common'
 import SignIn from '@/pages/auth/sign-in.tsx'
 
 export default function AuthPage() {
     const navigate = useNavigate()
     const [isAuthChecked, setIsAuthChecked] = useState(false)
 
-    // 이미 유효한 Amplify 세션이 있으면 로그인 폼을 보여줄 필요 없이 대시보드로 보냄
+    // fetchAuthSession()의 자동 갱신을 쓰지 않고, 로그인 시 저장한 accessToken의
+    // exp만 검사한다. 아직 유효하면 대시보드로 보내고, 만료/없음이면 로그인 폼을 보여준다.
     useEffect(() => {
-        fetchAuthSession()
-            .then((session) => {
-                const accessToken = session.tokens?.accessToken?.toString()
+        const token = $accessToken.get()
+        const exp = token ? getTokenExp(token) : null
 
-                if (accessToken) {
-                    navigate('/') // ⚠️ 대시보드 경로, router.tsx 기준 재확인
-                    return
-                }
+        if (exp && !isTokenExpired(exp)) {
+            navigate('/') // ⚠️ 대시보드 경로, router.tsx 기준 재확인
+            return
+        }
 
-                setIsAuthChecked(true)
-            })
-            .catch(() => {
-                setIsAuthChecked(true)
-            })
+        // 만료됐거나 토큰이 없으면 저장된 값을 비워 로그아웃 상태로 만든다.
+        $accessToken.set(undefined)
+        setIsAuthChecked(true)
     }, [navigate])
 
     if (!isAuthChecked) {
