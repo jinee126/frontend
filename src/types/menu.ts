@@ -54,3 +54,33 @@ export interface RolePermissionsByRole {
   role: RoleResponse
   menus: MenuCategoryGroup[]
 }
+
+/** 메뉴 구성(구조) 관리 화면용 트리 노드. (권한/Role 정보 없음) */
+export interface MenuNode {
+  id: number
+  menuKey: string
+  menuName: string
+  path: string | null
+  parentId: number | null
+  displayOrder: number
+  active: boolean
+  children: MenuNode[]
+}
+
+/** 메뉴 생성 요청. id 는 서버가 채번한다. */
+export interface CreateMenuRequest {
+  menuKey: string
+  menuName: string
+  path: string | null
+  parentId: number | null
+  displayOrder: number
+}
+
+/** 메뉴 수정 요청. (menuKey 는 불변) */
+export interface UpdateMenuRequest {
+  menuName: string
+  path: string | null
+  parentId: number | null
+  displayOrder: number
+  active: boolean
+}
