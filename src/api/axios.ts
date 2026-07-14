@@ -31,6 +31,11 @@ api.interceptors.request.use((config) => {
   }
 
   config.headers.Authorization = `Bearer ${token}`
+
+  if (import.meta.env.DEV) {
+    console.log('[API 요청]', config.method?.toUpperCase(), config.url, config.data)
+  }
+
   return config
 })
 
@@ -47,9 +52,18 @@ export async function refreshAccessToken(): Promise<string> {
 }
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if (import.meta.env.DEV) {
+      console.log('[API 응답]', response.status, response.config.url, response.data)
+    }
+    return response
+  },
   // 서버 에러 응답 캐치 미들웨어
   async ({ response, config }: AxiosError<ApiResponse<null>>) => {
+    if (import.meta.env.DEV) {
+      console.log('[API 에러]', response?.status, config?.url, response?.data)
+    }
+
     // 401 = 인증 실패(만료/위변조 등) - 갱신 시도 없이 즉시 로그아웃
     if (response?.status === 401) {
       await forceSignOut()

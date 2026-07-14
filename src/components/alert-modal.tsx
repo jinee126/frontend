@@ -1,5 +1,5 @@
 ﻿import { useStore } from '@nanostores/react'
-import styles from '@/components/popup.module.scss'
+import styles from '@/components/ui/popup.module.scss'
 import Button from '@/components/ui/button.tsx'
 import { $alertModal } from '@/stores/alert-modal.ts'
 

@@ -2,6 +2,7 @@ import type { AuthSession } from 'aws-amplify/auth'
 import { persistentAtom } from '@nanostores/persistent'
 
 export interface AuthUser {
+  userName: string
   authorityGroup: string
   menuGroup: string
 }
@@ -20,6 +21,7 @@ export function setAuthUserFromSession(session: AuthSession) {
   }
 
   $authUser.set({
+    userName: (payload['cognito:username'] as string) ?? '',
     authorityGroup: (payload['custom:authority_group'] as string) ?? '',
     menuGroup: (payload['custom:menu_group'] as string) ?? '',
   })

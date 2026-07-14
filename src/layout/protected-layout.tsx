@@ -4,5 +4,4 @@ import { useAuthGuard } from '@/hooks/use-auth-guard'
 export default function ProtectedLayout() {
   useAuthGuard()
 
-  return <Outlet />
-}
+  return <Outlet />}

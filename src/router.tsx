@@ -1,4 +1,5 @@
 import { Route, Routes } from 'react-router'
+import MenuManagementPage from '@/pages/admin/menus/menu-management-page.tsx'
 import AdminRolesPage from '@/pages/admin/roles/admin-roles-page.tsx'
 import AdminUserPage from '@/pages/admin/users/users-page.tsx'
 import AuthPage from '@/pages/auth/auth-page.tsx'
@@ -30,6 +31,7 @@ export default function Router() {
         <Route path="/monitoring/logging" element={<LoggingPage />} />
         <Route path="/user/account" element={<UserAccountPage />} />
         <Route path="/admin/users" element={<AdminUserPage />} />
+        <Route path="/admin/menus" element={<MenuManagementPage />} />
         <Route path="/admin/roles" element={<AdminRolesPage />} />
         <Route path="/admin/roles/mapping" element={<MappingPage />} />
         <Route path="/admin/roles/role-create" element={<RoleCreatePage />} />

@@ -1,6 +1,8 @@
 import { Navigate, Outlet } from 'react-router'
 import { $accessToken } from '@/stores/access-token'
 import { getTokenExp, isTokenExpired } from '@/utils/common'
+import {useEffect,useState} from 'react'
+import {SideMenu} from "@/types/mens.ts";
 
 export default function DefaultLayout() {
   const token = $accessToken.get()
@@ -10,6 +12,17 @@ export default function DefaultLayout() {
   if (!exp || isTokenExpired(exp)) {
     return <Navigate to="/login" replace />
   }
+
+  const [isNavOpen,setIsNavOpen] = useState(true)
+  const [menuList,setMenuList] useState<SideMenu[]>([])
+
+  const toggleNav = () => setIsNavOpen((prev) => !prev)
+
+  const {data:myMenus} = useGetMyMenus()
+
+  useEffect(() => {
+    setMenuList(makeMenu(myMenus?.mens || []))
+  },[myMenus])
 
   return (
     <div className="default-layout">
