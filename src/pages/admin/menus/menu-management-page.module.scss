@@ -192,10 +192,15 @@
 .checkField {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   margin-bottom: 16px;
   font-size: 13px;
   cursor: pointer;
+
+  input[type='checkbox'] {
+    width: auto;
+    margin: 0;
+  }
 }
 
 .formActions {
